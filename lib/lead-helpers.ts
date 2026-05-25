@@ -31,36 +31,39 @@ export function normalizeLead(raw: UnknownLead): Lead {
     domain_root: domain.replace(/^https?:\/\//i, "").replace(/\/$/, ""),
     city: readString(raw.city),
     icp: normalizeIcp(readString(raw.icp) ?? readString(raw.icp_type)),
-    ad_source: readString(raw.ad_source),
+    ad_source: readString(raw.ad_source) ?? readString(raw.source),
     ad_url: readString(raw.ad_url),
     ad_active: readBoolean(raw.ad_active),
     contact_name: readString(raw.contact_name),
     contact_email: readString(raw.contact_email),
     contact_whatsapp: readString(raw.contact_whatsapp),
     whatsapp_detected: readBoolean(raw.whatsapp_detected ?? raw.has_whatsapp),
-    pagespeed_mobile: readNumber(raw.pagespeed_mobile ?? raw.pagespeed_mobile_score),
+    pagespeed_mobile: readNumber(raw.pagespeed_mobile ?? raw.pagespeed_mobile_score ?? raw.pagespeed_mobile_perf),
     pagespeed_seo: readNumber(raw.pagespeed_seo),
-    has_pixel: readBoolean(raw.has_pixel ?? raw.has_meta_pixel),
-    has_crm: readBoolean(raw.has_crm ?? Boolean(raw.crm_name)),
-    crm_name: readString(raw.crm_name),
-    tech_stack: readRecord(raw.tech_stack),
+    has_pixel: readBoolean(raw.has_pixel ?? raw.has_meta_pixel ?? stackIncludes(raw.stack, "pixel")),
+    has_crm: readBoolean(raw.has_crm ?? Boolean(raw.crm_name ?? raw.crm_detected)),
+    crm_name: readString(raw.crm_name) ?? readString(raw.crm_detected),
+    tech_stack: readRecord(raw.tech_stack) ?? readStack(raw.stack),
     lp_markdown: readString(raw.lp_markdown),
     fit_score: fitScore,
     timing_score: timingScore,
     total_score: totalScore,
     audit_points: Array.isArray(raw.audit_points) ? raw.audit_points as Lead["audit_points"] : null,
     buying_moment_score: readNumber(raw.buying_moment_score),
-    msg_whatsapp: readString(raw.msg_whatsapp) ?? readString(raw.whatsapp_message),
-    msg_email_subject: readString(raw.msg_email_subject),
-    msg_followup_d3: readString(raw.msg_followup_d3),
-    msg_followup_d7: readString(raw.msg_followup_d7),
+    msg_whatsapp: readString(raw.msg_whatsapp) ?? readString(raw.whatsapp_message) ?? readString(raw.whatsapp_lure),
+    msg_email_subject: readString(raw.msg_email_subject) ?? readString(raw.email_subject),
+    msg_followup_d3: readString(raw.msg_followup_d3) ?? readString(raw.followup_d3),
+    msg_followup_d7: readString(raw.msg_followup_d7) ?? readString(raw.followup_d7),
     prompt_version: readString(raw.prompt_version),
     status: readString(raw.status) ?? "awaiting_approval",
     rejection_reason: readString(raw.rejection_reason),
-    outreach_sent_at: readString(raw.outreach_sent_at),
-    outreach_channel: readString(raw.outreach_channel),
-    response_type: readString(raw.response_type),
-    objection: readString(raw.objection),
+    snoozed_until: readString(raw.snoozed_until),
+    outreach_sent_at: readString(raw.outreach_sent_at) ?? readString(raw.sent_at),
+    outreach_channel: readString(raw.outreach_channel) ?? readString(raw.sent_channel),
+    response_type: readString(raw.response_type) ?? readString(raw.response_status),
+    objection: readString(raw.objection) ?? readString(raw.response_notes),
+    followup_d3_sent: readBoolean(raw.followup_d3_sent),
+    followup_d7_sent: readBoolean(raw.followup_d7_sent),
     meeting_scheduled: readBoolean(raw.meeting_scheduled),
     deal_value: readNumber(raw.deal_value)
   };
@@ -83,7 +86,8 @@ export function getUniqueIcps(leads: Lead[]) {
 }
 
 export function calculateStats(leads: Lead[]) {
-  const waiting = leads.filter((lead) => lead.status === "awaiting_approval").length;
+  const waitingLeads = leads.filter((lead) => lead.status === "awaiting_approval");
+  const waiting = waitingLeads.length;
   const today = new Date().toISOString().slice(0, 10);
   const approvedToday = leads.filter(
     (lead) => lead.status === "approved" && lead.created_at.slice(0, 10) === today
@@ -93,11 +97,15 @@ export function calculateStats(leads: Lead[]) {
     (lead) => lead.response_type && lead.response_type !== "no_response"
   ).length;
   const responseRate = sent === 0 ? 0 : Math.round((responded / sent) * 100);
+  const avgScore =
+    waiting === 0
+      ? 0
+      : Math.round(waitingLeads.reduce((total, lead) => total + scoreValue(lead.total_score), 0) / waiting);
 
   return {
     waiting,
+    avgScore,
     approvedToday,
-    sent,
     responseRate
   };
 }
@@ -136,4 +144,12 @@ function readRecord(value: unknown) {
   return value && typeof value === "object" && !Array.isArray(value)
     ? (value as Record<string, unknown>)
     : null;
+}
+
+function readStack(value: unknown) {
+  return Array.isArray(value) ? { items: value.filter((item) => typeof item === "string") } : null;
+}
+
+function stackIncludes(value: unknown, needle: string) {
+  return Array.isArray(value) && value.some((item) => typeof item === "string" && item.toLowerCase().includes(needle));
 }

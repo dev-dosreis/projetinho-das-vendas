@@ -18,6 +18,7 @@ import {
   SelectTrigger,
   SelectValue
 } from "@/components/ui/select";
+import { Slider } from "@/components/ui/slider";
 
 type BandejaClientProps = {
   initialLeads: Lead[];
@@ -97,8 +98,8 @@ export default function BandejaClient({ initialLeads, usingDemoData, dataError }
 
       <StatsBar
         waiting={stats.waiting}
+        avgScore={stats.avgScore}
         approvedToday={stats.approvedToday}
-        sent={stats.sent}
         responseRate={stats.responseRate}
       />
 
@@ -107,7 +108,7 @@ export default function BandejaClient({ initialLeads, usingDemoData, dataError }
           <SlidersHorizontal className="size-4 text-emerald-600" />
           <CardTitle className="text-sm font-semibold text-slate-950">Filtros</CardTitle>
         </CardHeader>
-        <CardContent className="liquid-content grid gap-3 p-4 pt-2 md:grid-cols-[1fr_180px_180px]">
+        <CardContent className="liquid-content grid gap-3 p-4 pt-2 md:grid-cols-[1fr_180px_220px]">
           <label className="flex flex-col gap-1.5 text-xs font-medium uppercase tracking-wider text-slate-500">
             Cidade
             <div className="relative">
@@ -140,17 +141,22 @@ export default function BandejaClient({ initialLeads, usingDemoData, dataError }
             </Select>
           </label>
 
-          <label className="flex flex-col gap-1.5 text-xs font-medium uppercase tracking-wider text-slate-500">
-            Score minimo
-            <Input
-              value={minScore}
-              min={0}
-              max={100}
-              step={5}
-              type="number"
-              onChange={(event) => setMinScore(Number(event.target.value))}
-              className="liquid-input h-11 rounded-2xl text-slate-950"
-            />
+          <label className="flex flex-col gap-2 text-xs font-medium uppercase tracking-wider text-slate-500">
+            <span className="flex items-center justify-between gap-3">
+              Score minimo
+              <span className="font-mono text-sm font-bold text-emerald-600">{minScore}</span>
+            </span>
+            <div className="liquid-input flex h-11 items-center rounded-2xl px-4">
+              <Slider
+                value={[minScore]}
+                min={0}
+                max={100}
+                step={5}
+                aria-label="Score minimo"
+                onValueChange={(value) => setMinScore(value[0] ?? 0)}
+                className="[&_[role=slider]]:border-emerald-500 [&_[role=slider]]:bg-white [&_[role=slider]]:shadow-[0_6px_18px_rgba(16,185,129,0.24)] [&_[data-orientation=horizontal]]:bg-slate-200/80 [&_[data-orientation=horizontal]>span]:bg-emerald-500"
+              />
+            </div>
           </label>
         </CardContent>
       </Card>

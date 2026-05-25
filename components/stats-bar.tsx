@@ -1,17 +1,17 @@
 "use client";
 
-import { CheckCircle2, Clock, Send, TrendingUp } from "lucide-react";
+import { CheckCircle2, Clock, Gauge, TrendingUp } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
 interface StatsProps {
   waiting: number;
+  avgScore: number;
   approvedToday: number;
-  sent: number;
   responseRate: number;
 }
 
-export default function StatsBar({ waiting, approvedToday, sent, responseRate }: StatsProps) {
+export default function StatsBar({ waiting, avgScore, approvedToday, responseRate }: StatsProps) {
   const stats = [
     {
       icon: Clock,
@@ -28,11 +28,11 @@ export default function StatsBar({ waiting, approvedToday, sent, responseRate }:
       color: "text-emerald-600"
     },
     {
-      icon: Send,
-      label: "Enviados",
-      helper: "abordagens",
-      value: sent,
-      color: "text-slate-700"
+      icon: Gauge,
+      label: "Score medio",
+      helper: "bandeja",
+      value: avgScore,
+      color: avgScore >= 70 ? "text-emerald-600" : "text-slate-700"
     },
     {
       icon: TrendingUp,

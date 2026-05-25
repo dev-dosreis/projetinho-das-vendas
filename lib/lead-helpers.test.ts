@@ -12,6 +12,7 @@ describe("lead helpers", () => {
       has_meta_pixel: true,
       pagespeed_mobile_score: 63,
       whatsapp_message: "Oi",
+      snoozed_until: "2026-06-01T12:00:00.000Z",
       fit_score: 42,
       timing_score: 42,
       total_score: 84,
@@ -24,6 +25,7 @@ describe("lead helpers", () => {
     expect(lead.has_pixel).toBe(true);
     expect(lead.pagespeed_mobile).toBe(63);
     expect(lead.msg_whatsapp).toBe("Oi");
+    expect(lead.snoozed_until).toBe("2026-06-01T12:00:00.000Z");
   });
 
   it("filters awaiting leads and sorts by total score", () => {
@@ -38,13 +40,14 @@ describe("lead helpers", () => {
 
   it("calculates the bandeja stats", () => {
     const stats = calculateStats([
-      normalizeLead({ id: "1", company_name: "A", domain_root: "a.com", status: "awaiting_approval" }),
+      normalizeLead({ id: "1", company_name: "A", domain_root: "a.com", status: "awaiting_approval", total_score: 80 }),
+      normalizeLead({ id: "3", company_name: "C", domain_root: "c.com", status: "awaiting_approval", total_score: 60 }),
       normalizeLead({ id: "2", company_name: "B", domain_root: "b.com", status: "approved", outreach_sent_at: "2026-05-25T12:00:00.000Z", response_type: "positive" })
     ]);
 
-    expect(stats.waiting).toBe(1);
+    expect(stats.waiting).toBe(2);
+    expect(stats.avgScore).toBe(70);
     expect(stats.approvedToday).toBeGreaterThanOrEqual(0);
-    expect(stats.sent).toBe(1);
     expect(stats.responseRate).toBe(100);
   });
 });

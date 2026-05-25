@@ -5,11 +5,12 @@ export type LeadStatus =
   | "enriched"
   | "awaiting_approval"
   | "approved"
+  | "sent"
   | "rejected"
   | "snoozed"
   | "postponed";
 
-export type ResponseType = "positive" | "neutral" | "negative" | "no_response";
+export type ResponseType = "waiting" | "positive" | "neutral" | "negative" | "no_response";
 
 export type AdSource = "meta" | "google" | "tiktok" | "manual";
 
@@ -46,10 +47,13 @@ export interface Lead {
   prompt_version?: string | null;
   status: LeadStatus | string;
   rejection_reason?: string | null;
+  snoozed_until?: string | null;
   outreach_sent_at?: string | null;
   outreach_channel?: string | null;
   response_type?: ResponseType | string | null;
   objection?: string | null;
+  followup_d3_sent?: boolean | null;
+  followup_d7_sent?: boolean | null;
   meeting_scheduled?: boolean | null;
   deal_value?: number | null;
 }
@@ -87,6 +91,7 @@ export const STATUS_LABELS: Record<string, string> = {
   enriched: "Enriquecido",
   awaiting_approval: "Aguardando",
   approved: "Aprovado",
+  sent: "Enviado",
   rejected: "Rejeitado",
   snoozed: "Adiado",
   postponed: "Adiado"

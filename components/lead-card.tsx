@@ -37,6 +37,14 @@ import {
   CollapsibleTrigger
 } from "@/components/ui/collapsible";
 import { Progress } from "@/components/ui/progress";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { ICP_COLORS, ICP_LABELS, type Lead } from "@/lib/types";
@@ -52,6 +60,7 @@ export default function LeadCard({ lead, onAction }: LeadCardProps) {
   const [copiedMsg, setCopiedMsg] = useState(false);
   const [loading, setLoading] = useState<"approve" | "snooze" | "reject" | null>(null);
   const [showReject, setShowReject] = useState(false);
+  const [rejectionReason, setRejectionReason] = useState("");
   const [editedMsg, setEditedMsg] = useState(lead.msg_whatsapp ?? "");
 
   async function handleAction(action: "approve" | "snooze" | "reject", reason?: string) {
@@ -61,6 +70,7 @@ export default function LeadCard({ lead, onAction }: LeadCardProps) {
     } finally {
       setLoading(null);
       setShowReject(false);
+      setRejectionReason("");
     }
   }
 
@@ -254,7 +264,10 @@ export default function LeadCard({ lead, onAction }: LeadCardProps) {
               label="Adiar 7d"
             />
             <ActionButton
-              onClick={() => setShowReject(true)}
+              onClick={() => {
+                setRejectionReason("");
+                setShowReject(true);
+              }}
               loading={false}
               color="red"
               icon={X}
@@ -264,26 +277,45 @@ export default function LeadCard({ lead, onAction }: LeadCardProps) {
         ) : (
           <div className="flex w-full flex-col gap-3 animate-slide-up">
             <p className="text-sm font-semibold text-slate-950">Por que rejeitar?</p>
+            <Select value={rejectionReason} onValueChange={setRejectionReason}>
+              <SelectTrigger className="h-11 rounded-2xl border-rose-100 bg-white/55 text-slate-700 shadow-inner backdrop-blur-xl">
+                <SelectValue placeholder="Escolha o motivo" />
+              </SelectTrigger>
+              <SelectContent className="rounded-2xl border-white/80 bg-white/90 text-slate-950 shadow-[0_18px_60px_rgba(15,23,42,0.14)] backdrop-blur-2xl">
+                <SelectGroup>
+                  {REJECTION_REASONS.map((reason) => (
+                    <SelectItem key={reason} value={reason}>
+                      {reason}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
             <div className="grid grid-cols-2 gap-2">
-              {REJECTION_REASONS.map((reason) => (
-                <Button
-                  key={reason}
-                  onClick={() => handleAction("reject", reason)}
-                  disabled={loading === "reject"}
-                  variant="outline"
-                  className="justify-start rounded-2xl border-rose-100 bg-white/55 px-3 text-left text-xs text-slate-600 backdrop-blur-xl hover:border-rose-200 hover:bg-rose-50 hover:text-rose-600"
-                >
-                  {reason}
-                </Button>
-              ))}
+              <Button
+                onClick={() => handleAction("reject", rejectionReason)}
+                disabled={loading === "reject" || !rejectionReason}
+                variant="outline"
+                className="h-11 rounded-2xl border-rose-200 bg-white/55 font-semibold text-rose-600 shadow-inner backdrop-blur-xl hover:border-rose-300 hover:bg-rose-50 disabled:text-slate-400"
+              >
+                {loading === "reject" ? (
+                  <div className="size-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                ) : (
+                  <X data-icon="inline-start" />
+                )}
+                Confirmar
+              </Button>
+              <Button
+                onClick={() => {
+                  setShowReject(false);
+                  setRejectionReason("");
+                }}
+                variant="ghost"
+                className="h-11 rounded-2xl text-slate-500 hover:bg-white/60 hover:text-slate-950"
+              >
+                Cancelar
+              </Button>
             </div>
-            <Button
-              onClick={() => setShowReject(false)}
-              variant="ghost"
-              className="rounded-2xl text-slate-500 hover:bg-white/60 hover:text-slate-950"
-            >
-              Cancelar
-            </Button>
           </div>
         )}
       </CardFooter>
