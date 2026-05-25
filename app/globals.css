@@ -1,0 +1,125 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 210 40% 98%;
+    --foreground: 222 47% 11%;
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+    --primary: 142 72% 29%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222 47% 11%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 47%;
+    --accent: 210 40% 96%;
+    --accent-foreground: 222 47% 11%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 142 72% 29%;
+    --radius: 0.75rem;
+    --font-geist: "Geist", "Mona Sans", system-ui, sans-serif;
+    --font-geist-mono: "Geist Mono", ui-monospace, monospace;
+  }
+
+  * {
+    @apply border-border;
+    box-sizing: border-box;
+  }
+
+  body {
+    @apply min-h-screen bg-white font-sans text-slate-950 antialiased;
+    background-image:
+      radial-gradient(circle at 16% -10%, rgba(16, 185, 129, 0.13), transparent 36%),
+      radial-gradient(circle at 88% 0%, rgba(15, 23, 42, 0.07), transparent 30%),
+      linear-gradient(180deg, #ffffff 0%, #fbfcff 52%, #f3f7fb 100%);
+    background-attachment: fixed;
+  }
+
+  ::selection {
+    background: rgba(63, 185, 80, 0.3);
+  }
+
+  textarea {
+    resize: vertical;
+    font-family: inherit;
+  }
+
+  *:focus-visible {
+    outline: 2px solid #16a34a;
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+@layer components {
+  .glass-card {
+    @apply liquid-card;
+  }
+
+  .liquid-card {
+    @apply relative overflow-hidden border border-white/75 bg-white/60 shadow-[0_28px_90px_rgba(15,23,42,0.12)] backdrop-blur-2xl ring-1 ring-slate-900/[0.045];
+    background:
+      linear-gradient(135deg, rgba(255, 255, 255, 0.88), rgba(255, 255, 255, 0.48)),
+      radial-gradient(circle at 18% 0%, rgba(255, 255, 255, 0.95), transparent 32%);
+  }
+
+  .liquid-card::before {
+    content: "";
+    pointer-events: none;
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background:
+      linear-gradient(135deg, rgba(255, 255, 255, 0.9), transparent 36%),
+      radial-gradient(circle at 82% 8%, rgba(255, 255, 255, 0.72), transparent 24%);
+    opacity: 0.72;
+  }
+
+  .liquid-card::after {
+    content: "";
+    pointer-events: none;
+    position: absolute;
+    inset: 1px;
+    border-radius: inherit;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.88),
+      inset 0 -18px 38px rgba(15, 23, 42, 0.035);
+  }
+
+  .liquid-content {
+    @apply relative z-10;
+  }
+
+  .liquid-pill {
+    @apply border border-white/80 bg-white/60 shadow-[0_12px_40px_rgba(15,23,42,0.08)] backdrop-blur-2xl ring-1 ring-slate-900/[0.04];
+  }
+
+  .liquid-input {
+    @apply border-slate-200/80 bg-white/55 shadow-inner backdrop-blur-xl focus-visible:ring-emerald-200;
+  }
+}
+
+::-webkit-scrollbar-track {
+  background: #f8fbff;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
