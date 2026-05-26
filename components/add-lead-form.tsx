@@ -2,8 +2,9 @@
 
 import type { FormEvent, ReactNode } from "react";
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowRight, CheckCircle2, Clock3, Loader2, PlusCircle } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -19,6 +20,7 @@ import {
   SelectValue
 } from "@/components/ui/select";
 import type { Lead } from "@/lib/types";
+import { cn } from "@/lib/utils";
 
 type FormState = {
   domain: string;
@@ -57,12 +59,13 @@ const SOURCE_OPTIONS = [
 ];
 
 const STEPS = [
-  { icon: "🔍", label: "Buscando landing page..." },
-  { icon: "⚡", label: "Verificando PageSpeed..." },
-  { icon: "🧩", label: "Detectando stack..." },
-  { icon: "👤", label: "Procurando contato..." },
-  { icon: "🧠", label: "Calculando score..." },
-  { icon: "✍️", label: "Gerando mensagem..." }
+  { icon: "01", label: "Lendo site com Firecrawl" },
+  { icon: "02", label: "Medindo PageSpeed mobile" },
+  { icon: "03", label: "Detectando stack no BuiltWith" },
+  { icon: "04", label: "Consultando DNS e RDAP" },
+  { icon: "05", label: "Buscando contato site/Apollo/Hunter" },
+  { icon: "06", label: "Gerando score com Gemini Flash" },
+  { icon: "07", label: "Salvando na Bandeja" }
 ];
 
 export default function AddLeadForm() {
@@ -111,19 +114,23 @@ export default function AddLeadForm() {
   return (
     <div className="flex flex-col gap-6">
       <section className="flex flex-col gap-2">
-        <h1 className="text-3xl font-bold tracking-tight text-slate-950">Adicionar lead</h1>
-        <p className="max-w-2xl text-sm text-slate-500">
-          Cadastre um dominio para gerar score, mensagem e entrada na bandeja.
-        </p>
+        <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight text-slate-950">Adicionar lead</h1>
+            <p className="mt-1 max-w-2xl text-sm text-slate-500">
+              Digite o dominio. O pipeline coleta, pesquisa, pontua e manda para aprovacao.
+            </p>
+          </div>
+          <Button asChild variant="outline" className="h-11 rounded-2xl bg-white/60">
+            <Link href="/apis">Ver APIs</Link>
+          </Button>
+        </div>
       </section>
 
       <form onSubmit={handleSubmit} className="grid gap-5 lg:grid-cols-[1fr_360px]">
         <Card className="liquid-card rounded-[1.6rem]">
           <CardHeader className="liquid-content">
-            <CardTitle className="flex items-center gap-2 text-xl text-slate-950">
-              <PlusCircle data-icon="inline-start" />
-              Novo dominio
-            </CardTitle>
+            <CardTitle className="text-xl text-slate-950">Novo dominio</CardTitle>
             <CardDescription>Preencha apenas o necessario para iniciar o enriquecimento.</CardDescription>
           </CardHeader>
           <CardContent className="liquid-content grid gap-4 md:grid-cols-2">
@@ -205,7 +212,7 @@ export default function AddLeadForm() {
               disabled={isSubmitting}
               className="h-14 rounded-2xl bg-emerald-600 font-semibold text-white shadow-[0_16px_40px_rgba(16,185,129,0.28)] hover:bg-emerald-700"
             >
-              {isSubmitting ? <Loader2 className="animate-spin" data-icon="inline-start" /> : <ArrowRight data-icon="inline-start" />}
+              {isSubmitting ? <Loader2 className="animate-spin" data-icon="inline-start" /> : null}
               {isSubmitting ? "Processando" : "Adicionar e enriquecer"}
             </Button>
           </CardFooter>
@@ -232,16 +239,21 @@ export default function AddLeadForm() {
                   {STEPS.map((step, index) => (
                     <div key={step.label} className="flex items-center justify-between rounded-2xl border border-white/70 bg-white/45 px-3 py-2 text-sm text-slate-600 shadow-inner backdrop-blur-xl">
                       <span className="flex items-center gap-2">
-                        <span aria-hidden="true">{step.icon}</span>
+                        <span className="flex size-7 items-center justify-center rounded-full bg-slate-950 font-mono text-[10px] font-bold text-white" aria-hidden="true">
+                          {step.icon}
+                        </span>
                         {step.label}
                       </span>
-                      {createdLead || index < activeStep ? (
-                        <CheckCircle2 className="text-emerald-600" data-icon="inline-end" />
-                      ) : index === activeStep && isSubmitting ? (
-                        <Loader2 className="animate-spin text-slate-500" data-icon="inline-end" />
-                      ) : (
-                        <Clock3 className="text-slate-300" data-icon="inline-end" />
-                      )}
+                      <span className={cn(
+                        "rounded-full px-2 py-1 text-[11px] font-semibold",
+                        createdLead || index < activeStep
+                          ? "bg-emerald-50 text-emerald-700"
+                          : index === activeStep && isSubmitting
+                            ? "bg-slate-950 text-white"
+                            : "bg-white/70 text-slate-400"
+                      )}>
+                        {createdLead || index < activeStep ? "feito" : index === activeStep && isSubmitting ? "agora" : "fila"}
+                      </span>
                     </div>
                   ))}
                 </div>

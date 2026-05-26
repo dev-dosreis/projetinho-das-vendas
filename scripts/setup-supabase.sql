@@ -1,0 +1,4 @@
+-- Rode os arquivos abaixo no Supabase SQL Editor, nessa ordem:
+-- 1. scripts/setup-supabase-part1-columns.sql
+-- 2. scripts/setup-supabase-part2-data.sql
+-- 3. scripts/setup-supabase-part3-indexes-trigger.sql

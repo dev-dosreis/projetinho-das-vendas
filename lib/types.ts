@@ -27,6 +27,10 @@ export interface Lead {
   contact_name?: string | null;
   contact_email?: string | null;
   contact_whatsapp?: string | null;
+  contact_phone?: string | null;
+  contact_instagram?: string | null;
+  contact_discovery_source?: string | null;
+  contact_discovery_status?: string | null;
   whatsapp_detected?: boolean | null;
   pagespeed_mobile?: number | null;
   pagespeed_seo?: number | null;
@@ -35,6 +39,13 @@ export interface Lead {
   crm_name?: string | null;
   tech_stack?: Record<string, unknown> | null;
   lp_markdown?: string | null;
+  enrichment_sources?: Record<string, unknown> | null;
+  pagespeed_raw?: Record<string, unknown> | null;
+  builtwith_raw?: Record<string, unknown> | null;
+  mx_records?: Array<Record<string, unknown>> | null;
+  email_provider?: string | null;
+  rdap_raw?: Record<string, unknown> | null;
+  domain_registered_at?: string | null;
   fit_score: number;
   timing_score: number;
   total_score: number;
@@ -45,6 +56,11 @@ export interface Lead {
   msg_followup_d3?: string | null;
   msg_followup_d7?: string | null;
   prompt_version?: string | null;
+  prompt_family?: string | null;
+  llm_model?: string | null;
+  llm_input_snapshot?: Record<string, unknown> | null;
+  llm_output_raw?: Record<string, unknown> | null;
+  monthly_cost_usd?: number | null;
   status: LeadStatus | string;
   rejection_reason?: string | null;
   snoozed_until?: string | null;

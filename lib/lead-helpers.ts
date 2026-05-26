@@ -37,6 +37,10 @@ export function normalizeLead(raw: UnknownLead): Lead {
     contact_name: readString(raw.contact_name),
     contact_email: readString(raw.contact_email),
     contact_whatsapp: readString(raw.contact_whatsapp),
+    contact_phone: readString(raw.contact_phone),
+    contact_instagram: readString(raw.contact_instagram),
+    contact_discovery_source: readString(raw.contact_discovery_source),
+    contact_discovery_status: readString(raw.contact_discovery_status),
     whatsapp_detected: readBoolean(raw.whatsapp_detected ?? raw.has_whatsapp),
     pagespeed_mobile: readNumber(raw.pagespeed_mobile ?? raw.pagespeed_mobile_score ?? raw.pagespeed_mobile_perf),
     pagespeed_seo: readNumber(raw.pagespeed_seo),
@@ -45,6 +49,13 @@ export function normalizeLead(raw: UnknownLead): Lead {
     crm_name: readString(raw.crm_name) ?? readString(raw.crm_detected),
     tech_stack: readRecord(raw.tech_stack) ?? readStack(raw.stack),
     lp_markdown: readString(raw.lp_markdown),
+    enrichment_sources: readRecord(raw.enrichment_sources),
+    pagespeed_raw: readRecord(raw.pagespeed_raw),
+    builtwith_raw: readRecord(raw.builtwith_raw),
+    mx_records: Array.isArray(raw.mx_records) ? raw.mx_records as Array<Record<string, unknown>> : null,
+    email_provider: readString(raw.email_provider),
+    rdap_raw: readRecord(raw.rdap_raw),
+    domain_registered_at: readString(raw.domain_registered_at),
     fit_score: fitScore,
     timing_score: timingScore,
     total_score: totalScore,
@@ -55,6 +66,11 @@ export function normalizeLead(raw: UnknownLead): Lead {
     msg_followup_d3: readString(raw.msg_followup_d3) ?? readString(raw.followup_d3),
     msg_followup_d7: readString(raw.msg_followup_d7) ?? readString(raw.followup_d7),
     prompt_version: readString(raw.prompt_version),
+    prompt_family: readString(raw.prompt_family),
+    llm_model: readString(raw.llm_model),
+    llm_input_snapshot: readRecord(raw.llm_input_snapshot),
+    llm_output_raw: readRecord(raw.llm_output_raw),
+    monthly_cost_usd: readNumber(raw.monthly_cost_usd),
     status: readString(raw.status) ?? "awaiting_approval",
     rejection_reason: readString(raw.rejection_reason),
     snoozed_until: readString(raw.snoozed_until),
@@ -110,6 +126,36 @@ export function calculateStats(leads: Lead[]) {
   };
 }
 
+export function calculateSentStats(leads: Lead[], configuredMonthlyCostUsd: number) {
+  const sentLeads = leads.filter((lead) => lead.status === "sent" || Boolean(lead.outreach_sent_at));
+  const approvedBaseLeads = leads.filter((lead) =>
+    ["approved", "sent"].includes(String(lead.status)) || Boolean(lead.outreach_sent_at)
+  );
+  const storedMonthlyCost = Math.max(0, ...leads.map((lead) => Number(lead.monthly_cost_usd ?? 0)).filter(Number.isFinite));
+  const monthlyCostUsd = configuredMonthlyCostUsd > 0 ? configuredMonthlyCostUsd : storedMonthlyCost;
+  const responded = sentLeads.filter((lead) => ["positive", "negative"].includes(normalizeResponseType(lead.response_type))).length;
+  const positive = sentLeads.filter((lead) => normalizeResponseType(lead.response_type) === "positive").length;
+  const meetings = sentLeads.filter((lead) => lead.meeting_scheduled).length;
+  const responseRate = sentLeads.length === 0 ? 0 : Math.round((responded / sentLeads.length) * 100);
+  const costPerApproved =
+    approvedBaseLeads.length === 0 || monthlyCostUsd <= 0
+      ? 0
+      : monthlyCostUsd / approvedBaseLeads.length;
+
+  return {
+    sentLeads,
+    totalSent: sentLeads.length,
+    approvedCount: approvedBaseLeads.length,
+    responded,
+    positive,
+    meetings,
+    responseRate,
+    monthlyCostUsd,
+    hasCostConfig: monthlyCostUsd > 0,
+    costPerApproved
+  };
+}
+
 function normalizeIcp(value: string | null): ICP {
   if (!value) return "outro";
   const normalized = value.toLowerCase().replace(/\s+/g, "_");
@@ -125,6 +171,10 @@ function normalizeIcp(value: string | null): ICP {
   ]);
 
   return (allowed.has(normalized) ? normalized : "outro") as ICP;
+}
+
+function normalizeResponseType(value: unknown) {
+  return value === "positive" || value === "negative" || value === "no_response" ? value : "waiting";
 }
 
 function readString(value: unknown) {

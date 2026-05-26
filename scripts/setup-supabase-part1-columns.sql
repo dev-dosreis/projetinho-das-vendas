@@ -1,0 +1,61 @@
+create extension if not exists pgcrypto;
+
+create table if not exists public.leads (
+  id uuid default gen_random_uuid() primary key,
+  created_at timestamptz default now()
+);
+
+alter table public.leads add column if not exists updated_at timestamptz default now();
+alter table public.leads add column if not exists name text;
+alter table public.leads add column if not exists domain text;
+alter table public.leads add column if not exists domain_root text;
+alter table public.leads add column if not exists city text;
+alter table public.leads add column if not exists icp text;
+alter table public.leads add column if not exists source text;
+alter table public.leads add column if not exists ad_url text;
+alter table public.leads add column if not exists status text not null default 'candidate';
+alter table public.leads add column if not exists snoozed_until timestamptz;
+alter table public.leads add column if not exists lp_markdown text;
+alter table public.leads add column if not exists enrichment_sources jsonb default '{}'::jsonb;
+alter table public.leads add column if not exists whatsapp_detected boolean default false;
+alter table public.leads add column if not exists pagespeed_mobile_perf integer;
+alter table public.leads add column if not exists pagespeed_seo integer;
+alter table public.leads add column if not exists pagespeed_raw jsonb;
+alter table public.leads add column if not exists stack text[] default '{}';
+alter table public.leads add column if not exists crm_detected text;
+alter table public.leads add column if not exists builtwith_raw jsonb;
+alter table public.leads add column if not exists mx_records jsonb;
+alter table public.leads add column if not exists email_provider text;
+alter table public.leads add column if not exists rdap_raw jsonb;
+alter table public.leads add column if not exists domain_registered_at timestamptz;
+alter table public.leads add column if not exists contact_email text;
+alter table public.leads add column if not exists contact_name text;
+alter table public.leads add column if not exists contact_whatsapp text;
+alter table public.leads add column if not exists contact_phone text;
+alter table public.leads add column if not exists contact_instagram text;
+alter table public.leads add column if not exists contact_discovery_source text;
+alter table public.leads add column if not exists contact_discovery_status text;
+alter table public.leads add column if not exists fit_score integer default 0;
+alter table public.leads add column if not exists timing_score integer default 0;
+alter table public.leads add column if not exists total_score integer generated always as (coalesce(fit_score, 0) + coalesce(timing_score, 0)) stored;
+alter table public.leads add column if not exists buying_moment_score integer;
+alter table public.leads add column if not exists main_pain text;
+alter table public.leads add column if not exists angle text;
+alter table public.leads add column if not exists audit_points jsonb default '[]'::jsonb;
+alter table public.leads add column if not exists whatsapp_lure text;
+alter table public.leads add column if not exists email_subject text;
+alter table public.leads add column if not exists followup_d3 text;
+alter table public.leads add column if not exists followup_d7 text;
+alter table public.leads add column if not exists prompt_family text;
+alter table public.leads add column if not exists prompt_version text;
+alter table public.leads add column if not exists llm_model text;
+alter table public.leads add column if not exists llm_input_snapshot jsonb;
+alter table public.leads add column if not exists llm_output_raw jsonb;
+alter table public.leads add column if not exists monthly_cost_usd numeric(10,2);
+alter table public.leads add column if not exists sent_at timestamptz;
+alter table public.leads add column if not exists sent_channel text;
+alter table public.leads add column if not exists response_status text;
+alter table public.leads add column if not exists response_notes text;
+alter table public.leads add column if not exists followup_d3_sent boolean default false;
+alter table public.leads add column if not exists followup_d7_sent boolean default false;
+alter table public.leads add column if not exists meeting_scheduled boolean default false;

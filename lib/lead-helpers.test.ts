@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { calculateStats, filterLeads, normalizeLead } from "./lead-helpers";
+import { calculateSentStats, calculateStats, filterLeads, normalizeLead } from "./lead-helpers";
 
 describe("lead helpers", () => {
   it("normalizes legacy lead columns into the Claude lead shape", () => {
@@ -49,5 +49,25 @@ describe("lead helpers", () => {
     expect(stats.avgScore).toBe(70);
     expect(stats.approvedToday).toBeGreaterThanOrEqual(0);
     expect(stats.responseRate).toBe(100);
+  });
+
+  it("calculates cost per approved lead from configured monthly cost", () => {
+    const leads = [
+      normalizeLead({ id: "1", company_name: "A", domain_root: "a.com", status: "approved" }),
+      normalizeLead({ id: "2", company_name: "B", domain_root: "b.com", status: "sent", sent_at: "2026-05-26T12:00:00.000Z" }),
+      normalizeLead({ id: "3", company_name: "C", domain_root: "c.com", status: "awaiting_approval" })
+    ];
+
+    expect(calculateSentStats(leads, 140).costPerApproved).toBe(70);
+  });
+
+  it("falls back to monthly_cost_usd saved on leads", () => {
+    const leads = [
+      normalizeLead({ id: "1", company_name: "A", domain_root: "a.com", status: "approved", monthly_cost_usd: 90 }),
+      normalizeLead({ id: "2", company_name: "B", domain_root: "b.com", status: "sent", monthly_cost_usd: 90 })
+    ];
+
+    expect(calculateSentStats(leads, 0).monthlyCostUsd).toBe(90);
+    expect(calculateSentStats(leads, 0).costPerApproved).toBe(45);
   });
 });
